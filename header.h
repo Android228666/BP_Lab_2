@@ -21,28 +21,6 @@ struct Customer {
 void writeFile(std::string);
 void readFile(std::string);
 curDay getDay();
-int calculateAge(std::string, curDay);
 float discount(std::string, curDay);
 void functionCaller();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*struct dateOfBirth {
-	int year;
-	int month;
-	int day;
-};*/
