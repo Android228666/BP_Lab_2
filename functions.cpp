@@ -2,18 +2,54 @@
 
 
 
+bool checkDate(std::string line) {
+	int date, month, year;
+	std::string temp;
+	temp = line.substr(0, 2);
+	date = stoi(temp);
+	temp = line.substr(3, 2);
+	month = stoi(temp);
+	temp = line.substr(6, 4);
+	year = stoi(temp);
+
+	bool i = (year >= 1900 && year <= 2199 && month > 0 && month < 13 && date > 0) && ((month % 2 != 0 && date <= 31 && month <= 7) || (month % 2 == 0 && month != 2 && date <= 30 && month <= 7) ||
+		(month > 7 && month % 2 == 0 && date <= 31) || (month > 7 && month % 2 != 0 && date <= 30) ||
+		(month == 2 && ((year % 100 != 0 && year % 4 == 0 || year % 100 == 0 && year % 400 == 0)) && date <= 29) ||
+		(month == 2 && !(year % 100 != 0 && year % 4 == 0 || year % 100 == 0 && year % 400 == 0) && month <= 2) && date <= 28);
+
+	if (i) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 
 curDay getDay() {
-	std::cout << "Please, write current day, month and year (in format dd/mm/yyyy): ";
+	int check = 0;
 	std::string line, temp;
 	curDay A;
-	std::getline(std::cin, line);
-	temp = line.substr(0, 2);
-	A.date = stoi(temp);
-	temp = line.substr(3, 2);
-	A.month = stoi(temp);
-	temp = line.substr(6, 4);
-	A.year = stoi(temp);
+	
+	do {
+		std::cout << "Please, write current day, month and year (in format dd/mm/yyyy): ";
+		std::getline(std::cin, line);
+		temp = line.substr(0, 2);
+		A.date = stoi(temp);
+		temp = line.substr(3, 2);
+		A.month = stoi(temp);
+		temp = line.substr(6, 4);
+		A.year = stoi(temp);
+
+		if (checkDate(line)) {
+			check = 1;
+		}
+		else {
+			check = 0;
+			std::cout << "You have wrote day uncorrectly!" << std::endl;
+		}
+
+	} while (check != 1);
 
 	return A;
 }
@@ -30,6 +66,9 @@ void writeFile(std::string filename) {
 	do {
 		std::cout << "Please, enter a number of customers: ";
 		std::cin >> n;
+		std::cout << "Remember, if you write month or day incorrectly your user won't be in summary list. Below you can check rules and good example of date:" << std::endl;
+		std::cout << "0 < date <= 29/30/31(depends on which month), 0 < month <= 12, 1900 <= year <= 2199" << std::endl;
+		std::cout << "Good example: 29/03/1989 (date/month/year)" << std::endl;
 		
 		for (int i = 0; i < n; i++) {
 			std::cin.ignore();
@@ -44,7 +83,10 @@ void writeFile(std::string filename) {
 
 			std::cout << "Please, enter a number of good: ";
 			std::cin >> A.count;
-			write.write((char*)&A, sizeof(Customer));
+
+			if (checkDate(A.birth)) {
+				write.write((char*)&A, sizeof(Customer));
+			}
 			std::cout << std::endl;
 		}
 
@@ -68,6 +110,7 @@ void readFile(std::string filename) {
 		std::cout << "Gender: "  << A.gender  << std::endl;
 		std::cout << "Birth: "   << A.birth   << std::endl;
 		std::cout << "Count: "   << A.count   << std::endl;
+		std::cout << std::endl;
 	}
 
 	read.close();
@@ -79,7 +122,6 @@ float discount(std::string filename_1, curDay D) {
 	int calculateAge(std::string line, curDay D);
 	void fillSecond(Customer);
 	std::ifstream read(filename_1, std::ios::binary);
-	//std::ofstream write(filename_2, std::ios::binary);
 	Customer A;
 	std::string temp, line;
 	float total = 0;
@@ -103,7 +145,6 @@ float discount(std::string filename_1, curDay D) {
 	}
 
 	total *= 100;
-	//write.close();
 	read.close();
 
 	std::cout << "TOTAL SUM = " << total << std::endl;
@@ -147,6 +188,7 @@ void fillSecond(Customer B) {
 	std::string filename_1 = "final_file.bin";
 	std::ofstream write(filename_1, std::ios::binary | std::ios::app);
 	write.write((char*)&B, sizeof(Customer));
+	write.close();
 }
 
 
@@ -159,10 +201,12 @@ void functionCaller() {
 		std::string filename_1 = "first_file.bin";
 		std::string filename_2 = "final_file.bin";
 		writeFile(filename_1);
+		std::cout << "Customers_file: " << std::endl;
+		readFile(filename_1);
 		std::ofstream clean("final_file.bin", std::ios::trunc);
 		clean.close();
 		discount(filename_1, B);
-		std::cout << "Final_file: " << std::endl;
+		std::cout << std::endl << "Final_file: " << std::endl;
 		readFile(filename_2);
 
 		std::cout << "Maybe, you want to add other customers(Y/N): ";
@@ -177,55 +221,3 @@ void functionCaller() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//const int n = 100;
-//Customer customers[n];
-/*dateOfBirth date1 = {
-	2005, 10, 01
-};
-Customer cus1 = {"Khomenko", "M", date1 ,5};
-*/
-//std::cout << cus1;
-/*
-std::cout << "Surmane: " << cus1.surname << std::endl;
-std::cout << "Gender: "  << cus1.gender  << std::endl;
-std::cout << "Year: "    << date1.year   << std::endl;
-std::cout << "Month: "   << date1.month  << std::endl;
-std::cout << "Day: "     << date1.day   << std::endl;
-std::cout << "Count: "   << cus1.count   << std::endl;
-
-std::cout << "Day: " <<  std::setw(2) << std::setfill('0') << date1.day << std::endl;
-*/
-
-
-
-
-
-/*int day = 11, month = 11, year = 1965;
-std::cout << "Day = " << day << std::endl;
-std::cout << "Month = " << month << std::endl;
-std::cout << "Year = " << year << std::endl;
-struct tm date = { 0 };
-date.tm_year = year - 1900;
-date.tm_mon = month - 1;
-date.tm_mday = day;
-time_t normal = mktime(&date);
-time_t current;
-time(&current);
-int age = (difftime(current, normal) + 86400L / 2) / 86400L;
-std::cout << age / 365 << std::endl;
-write.write((char*)&A, sizeof(Customer));*/
